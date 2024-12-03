@@ -47,6 +47,7 @@ apt update
 apt upgrade
 apt install nodejs-lts
 apt install git
+apt install python
 ```
 
 ### Tool installation
@@ -191,7 +192,7 @@ Recently, there have been reports of hacked accounts and lost currency associate
 
 ✔ Automatic run/pup/piku randomly
 
-✔ Automatic claim daily reward
+✔ ~~Automatic claim daily reward~~
 
 ✔ Automatic sell animals once cash runs out
 
