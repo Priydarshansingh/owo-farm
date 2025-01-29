@@ -278,7 +278,12 @@ export class BaseAgent extends Client {
     };
     main = async () => {
         if (this.captchaDetected || this.paused || Date.now() - this.lastTime < 15_000)
-            return;
+{
+			logger.debug("Need time");
+			await this.sleep(ranInt(2000, 5000))
+			this.main();
+			return;
+		}
         const command = this.owoCommands[ranInt(0, this.owoCommands.length)];
         if (!command) {
             logger.debug("No command found");
