@@ -373,7 +373,12 @@ export class BaseAgent extends Client {
 	};
 
 	public main = async (): Promise<any> => {
-		if (this.captchaDetected || this.paused || Date.now() - this.lastTime < 15_000) return;
+		if (this.captchaDetected || this.paused || Date.now() - this.lastTime < 15_000) {
+			logger.debug("Need time");
+			await this.sleep(ranInt(2000, 5000))
+			this.main();
+			return;
+		}
 
 		const command = this.owoCommands[ranInt(0, this.owoCommands.length)];
 		if (!command) {
