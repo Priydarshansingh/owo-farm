@@ -44,7 +44,8 @@ export class BaseAgent extends Client {
     registerEvents = () => {
         this.on("ready", async () => {
             logger.info("Logged in as " + this.user?.displayName);
-            logger.info(`Next config reload: ${timeHandler(Date.now(), this.reloadTime)}`);
+            if (this.config.autoReload)
+                logger.info(`Next config reload: ${timeHandler(Date.now(), this.reloadTime)}`);
             if (this.config.adminID)
                 this.RETAINED_USERS_IDS.push(this.config.adminID);
             loadSweeper(this);
@@ -354,8 +355,12 @@ export class BaseAgent extends Client {
         ];
         commands = shuffleArray(commands.concat(this.questCommands));
         for (const command of commands) {
-            if (this.captchaDetected || this.paused)
+            if (this.captchaDetected || this.paused) {
+                logger.info("Captcha detected, waiting...");
+                await this.sleep(Math.abs(ranInt(2000, 5000)));
+                this.main();
                 return;
+            }
             if (command.condition)
                 await command.action();
             const delay = ranInt(15000, 22000) / commands.length;
