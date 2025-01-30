@@ -33,10 +33,10 @@ export class BaseAgent extends Client {
 
 	owoID = "408785106942164992";
 	prefix = "owo";
-
+	//equality
 	private owoCommands = shuffleArray([
-		...Array<string>(6).fill("hunt"),
-		...Array<string>(4).fill("battle"),
+		...Array<string>(5).fill("hunt"),
+		...Array<string>(5).fill("battle"),
 	]);
 	private questCommands = <CommandCondition[]>[]
 
@@ -68,6 +68,7 @@ export class BaseAgent extends Client {
 	public registerEvents = () => {
 		this.on("ready", async () => {
 			logger.info("Logged in as " + this.user?.displayName);
+			logger.info(`Next config reload: ${timeHandler(Date.now(), this.reloadTime)}`);
 
 			if (this.config.adminID) this.RETAINED_USERS_IDS.push(this.config.adminID);
 			loadSweeper(this);
@@ -140,6 +141,7 @@ export class BaseAgent extends Client {
 			ranInt(0, 59),
 			ranInt(0, 1000)
 		);
+		logger.info(`Reloading config... Next reload ${timeHandler(Date.now(), this.reloadTime)}`);
 		[this.gem1, this.gem2, this.gem3] = Array<undefined>(3).fill(undefined);
 		this.config = this.cache;
 		return true

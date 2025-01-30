@@ -4,6 +4,7 @@ import { BaseAgent } from "../structures/BaseAgent.js";
 import { logger } from "../utils/logger.js";
 import { consoleNotify, selfbotNotify } from "../feats/notify.js";
 import { solveImage } from "../feats/captcha.js";
+//@ts-ignore
 import decryptCaptcha from "../security/decrypt.js";
 
 export const owoHandler = async (agent: BaseAgent) => {
@@ -79,7 +80,7 @@ export const owoHandler = async (agent: BaseAgent) => {
             logger.info(`CAPTCHA HAS BEEN RESOLVED, ${agent.config.autoResume ? "RESTARTING SELFBOT" : "STOPPING SELFBOT"}...`)
             if (!agent.config.autoResume) process.exit(0)
             agent.captchaDetected = false
-            agent.main()
+           // agent.main()
         }
 
         else if (/have been banned/.test(normalized)) {

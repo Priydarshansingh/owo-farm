@@ -14,6 +14,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "setup": "npm install",
     "start": "node dest/index.js",
+    "dev:start": "tsc && npm run start",
     "build": "tsc && chmod u+x obfuscate.sh && node ./src/security/encrypt.js",
     "dev": "npm run build && npm start"
   },

@@ -14,7 +14,8 @@ class CustomLogger {
             sent: chalk.greenBright("[SENT]"),
             debug: chalk.blackBright("[DEBUG]"),
         };
-        const consoleFormat = printf(({ level, message, timestamp, stack }) => {
+        const consoleFormat = printf((info) => {
+            const { level, message, timestamp, stack } = info;
             const formattedTimestamp = chalk.bgYellow.black(timestamp);
             const levelLabel = levelFormats[level] || chalk.magenta(`[${level.toUpperCase()}]`);
             return stack

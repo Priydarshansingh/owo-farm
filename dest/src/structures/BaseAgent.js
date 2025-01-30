@@ -17,9 +17,10 @@ export class BaseAgent extends Client {
     totalTexts = 0;
     owoID = "408785106942164992";
     prefix = "owo";
+    //equality
     owoCommands = shuffleArray([
-        ...Array(6).fill("hunt"),
-        ...Array(4).fill("battle"),
+        ...Array(5).fill("hunt"),
+        ...Array(5).fill("battle"),
     ]);
     questCommands = [];
     commands = new Collection();
@@ -43,6 +44,7 @@ export class BaseAgent extends Client {
     registerEvents = () => {
         this.on("ready", async () => {
             logger.info("Logged in as " + this.user?.displayName);
+            logger.info(`Next config reload: ${timeHandler(Date.now(), this.reloadTime)}`);
             if (this.config.adminID)
                 this.RETAINED_USERS_IDS.push(this.config.adminID);
             loadSweeper(this);
@@ -98,6 +100,7 @@ export class BaseAgent extends Client {
     };
     aReload = async (force = false) => {
         this.reloadTime = new Date().setUTCHours(0, ranInt(0, 30), ranInt(0, 59), ranInt(0, 1000));
+        logger.info(`Reloading config... Next reload ${timeHandler(Date.now(), this.reloadTime)}`);
         [this.gem1, this.gem2, this.gem3] = Array(3).fill(undefined);
         this.config = this.cache;
         return true;
@@ -277,13 +280,12 @@ export class BaseAgent extends Client {
         });
     };
     main = async () => {
-        if (this.captchaDetected || this.paused || Date.now() - this.lastTime < 15_000)
-{
-			logger.debug("Need time");
-			await this.sleep(Math.abs(ranInt(2000, 5000)))
-			this.main();
-			return;
-		}
+        if (this.captchaDetected || this.paused || Date.now() - this.lastTime < 15_000) {
+            logger.debug("Need time");
+            await this.sleep(Math.abs(ranInt(2000, 5000)));
+            this.main();
+            return;
+        }
         const command = this.owoCommands[ranInt(0, this.owoCommands.length)];
         if (!command) {
             logger.debug("No command found");

@@ -7,8 +7,8 @@ const resumeCommand:Commands = {
         if(agent.paused) {
             agent.paused = false
             agent.captchaDetected = false
-            message.reply("Tool is resume!")
-            agent.main()
+            message.reply("Tool is resume in few seconds later.")
+         //   agent.main()
         } else message.reply(
             agent.captchaDetected 
             ? "**ACTION REQUIRED!** You must solve the captcha before resuming the tool" 

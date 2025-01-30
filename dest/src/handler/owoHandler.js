@@ -1,6 +1,7 @@
 import { logger } from "../utils/logger.js";
 import { consoleNotify, selfbotNotify } from "../feats/notify.js";
 import { solveImage } from "../feats/captcha.js";
+//@ts-ignore
 import decryptCaptcha from "../security/decrypt.js";
 export const owoHandler = async (agent) => {
     agent.on("messageCreate", async (message) => {
@@ -69,7 +70,7 @@ export const owoHandler = async (agent) => {
             if (!agent.config.autoResume)
                 process.exit(0);
             agent.captchaDetected = false;
-            agent.main();
+            // agent.main()
         }
         else if (/have been banned/.test(normalized)) {
             logger.alert("ACCOUNT HAS BEEN BANNED, STOPPING SELFBOT...");
