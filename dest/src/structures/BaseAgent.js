@@ -75,7 +75,7 @@ export class BaseAgent extends Client {
         if (this.captchaDetected || this.paused)
             return;
         if (delay)
-            await this.sleep(delay);
+            await this.sleep(Math.abs(delay));
         if (withPrefix)
             message = [this.prefix, message].join(" ");
         await channel.send(message).catch(e => logger.error(e));
@@ -116,7 +116,7 @@ export class BaseAgent extends Client {
     };
     aSleep = async () => {
         logger.info("Pausing for " + timeHandler(0, this.sleepTime, true));
-        await this.sleep(this.sleepTime);
+        await this.sleep(Math.abs(this.sleepTime));
         const nextShift = ranInt(38, 92);
         this.coutSleep += nextShift;
         this.sleepTime = mapInt(nextShift, 38, 92, 150_000, 1_000_000);
@@ -250,10 +250,10 @@ export class BaseAgent extends Client {
             this.inventory = msg.content.split("`");
             if (this.config.autoFCrate && this.inventory.includes("049"))
                 await this.send("lb fabled");
-            await this.sleep(ranInt(4800, 6200));
+            await this.sleep(Math.abs(ranInt(4800, 6200)));
             if (this.config.autoCrate && this.inventory.includes("050")) {
                 await this.send("lb all");
-                await this.sleep(ranInt(4800, 6200));
+                await this.sleep(Math.abs(ranInt(4800, 6200)));
                 return this.aGem(uGem1, uGem2, uGem3);
             }
             this.gem1 = this.inventory.filter((item) => /^05[1-7]$/.test(item)).map(Number);
@@ -280,14 +280,14 @@ export class BaseAgent extends Client {
         if (this.captchaDetected || this.paused || Date.now() - this.lastTime < 15_000)
 {
 			logger.debug("Need time");
-			await this.sleep(ranInt(2000, 5000))
+			await this.sleep(Math.abs(ranInt(2000, 5000)))
 			this.main();
 			return;
 		}
         const command = this.owoCommands[ranInt(0, this.owoCommands.length)];
         if (!command) {
             logger.debug("No command found");
-            await this.sleep(ranInt(1000, 1000));
+            await this.sleep(Math.abs(ranInt(1000, 1000)));
             this.main();
             return;
         }
@@ -357,9 +357,9 @@ export class BaseAgent extends Client {
             if (command.condition)
                 await command.action();
             const delay = ranInt(15000, 22000) / commands.length;
-            await this.sleep(ranInt(delay - 3000, delay + 1200));
+            await this.sleep(Math.abs(ranInt(delay - 3000, delay + 1200)));
         }
-        await this.sleep(ranInt(2000, 5000));
+        await this.sleep(Math.abs(ranInt(2000, 5000)));
         this.main();
     };
     run = (config) => {
