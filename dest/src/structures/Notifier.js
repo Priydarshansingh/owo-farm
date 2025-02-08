@@ -1,6 +1,7 @@
 import { MessageEmbed, WebhookClient } from "discord.js-selfbot-v13";
 import { exec, spawn } from "child_process";
 import { logger } from "../utils/logger.js";
+import { timeHandler } from "../utils/utils.js";
 import notifier from "node-notifier";
 import path from "path";
 const createMusic = (musicPath) => {
@@ -61,6 +62,9 @@ export class Notifier {
     attachmentUrl;
     content;
     unixTime;
+    notifTotalCaptcha = 0;
+    botUptime = 0;
+    captchaErr;
     constructor(message, config, solved = false) {
         this.unixTime = `<t:${Math.floor(message.createdTimestamp / 1000 + 600)}:f>`;
         this.message = message;
@@ -68,6 +72,9 @@ export class Notifier {
         this.status = solved;
         this.attachmentUrl = message.attachments.first()?.url;
         this.content = `${config.adminID ? `<@${config.adminID}>` : ""} Captcha Found in Channel: ${message.channel.toString()}`;
+        this.notifTotalCaptcha = totlCaptcha;
+        this.botUptime = timeHandler(readyTimestamp ?? 0, Date.now());
+        this.captchaErr = captchaError;
     }
     playSound = async () => {
         if (!this.config.musicPath)
@@ -86,25 +93,51 @@ export class Notifier {
         try {
             const webhook = new WebhookClient({ url: this.config.webhookURL });
             const embed = new MessageEmbed()
-                .setTitle("CAPTCHA DETECTED!")
-                .setURL(this.message.url)
-                .setDescription("**Status**: " + (this.status ? "✅ **SOLVED**" : "⚠ ⚠ **UNSOLVED** ⚠ ⚠"))
-                .addFields([
-                { name: "Captcha type: ", value: this.attachmentUrl ? `[Image Captcha](${this.message.url})` : "[Link Captcha](https://owobot.com/captcha)" }
+            .setTitle("Captcha Detected!")
+            .addFields([
+                { name: "User", 
+                  value: `<@${this.config.userID}>`, 
+                  inline: true, }
             ])
-                .setColor(this.status ? "GREEN" : "RED")
-                .setFooter({ text: "Copyright B2KI ADOS © since 2022", iconURL: this.message.guild?.iconURL({ format: "png" }) ?? "https://i.imgur.com/EqChQK1.png" })
-                .setTimestamp();
-            if (this.attachmentUrl)
-                embed.setImage(this.attachmentUrl);
-            if (!this.status)
-                embed.addFields({ name: "Please solve the captcha before: ", value: this.unixTime });
-            webhook.send({
-                avatarURL: this.message.client.user?.avatarURL({ dynamic: true }) ?? "https://i.imgur.com/9wrvM38.png",
-                username: "Captcha The Detective",
-                content: (this.config.adminID ? `<@${this.config.adminID}>` : "" + this.content),
-                embeds: embed ? [embed] : embed
-            });
+            .addFields([
+                { name: "Captcha Found in", 
+                  value: this.message.url, 
+                  inline: true, }
+            ])
+            .addFields([
+                { name: "Captcha Status", 
+                  value: this.status 
+                    ? "`Solved`" 
+                    : "`Unsolved`",
+                }
+            ])
+            .addFields([
+            { name: "Captcha Type", 
+                value: this.attachmentUrl 
+                ? `[Image Captcha](${this.message.url})` 
+                : "[Link Captcha](https://owobot.com/captcha)", }
+            ])
+            .setColor(this.status ? "GREEN" : "RED")
+            .setFooter({ text: `Total Captcha: ${this.notifTotalCaptcha}`,
+            })
+            .setTimestamp();
+        if (this.attachmentUrl)
+            embed.setImage(this.attachmentUrl);
+        if (!this.status)
+            embed.addFields({ name: "Solve the Captcha Before", value: this.unixTime });
+        if (this.captchaErr)
+            embed.addFields({name: "Captcha Error", value: "``" + this.captchaErr + "``", });
+        embed.addFields([
+            { name: "Active Time", 
+              value: "``" + this.botUptime + "``",
+            }
+        ]);
+        webhook.send({
+            avatarURL: "https://i.imgur.com/BUdDM0p.png",
+            username: "OwO Captcha Logs",
+            content: `<@${this.config.userID}>`,
+            embeds: embed ? [embed] : embed
+        });
         }
         catch (error) {
             logger.error("Error sending webhook notification");

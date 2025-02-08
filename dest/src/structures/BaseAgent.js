@@ -19,6 +19,8 @@ export class BaseAgent extends Client {
         resolved: 0,
         unsolved: 0,
     };
+    captchaError;
+    totlCaptcha = 0;
     owoID = "408785106942164992";
     prefix = "owo";
     owoCommands = shuffleArray([
