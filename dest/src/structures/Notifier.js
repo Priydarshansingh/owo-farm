@@ -65,7 +65,7 @@ export class Notifier {
     notifTotalCaptcha = 0;
     botUptime = 0;
     captchaErr;
-    constructor(message, config, solved = false) {
+    constructor(message, config, totlCaptcha, readyTimestamp, captchaError, solved = false) {
         this.unixTime = `<t:${Math.floor(message.createdTimestamp / 1000 + 600)}:f>`;
         this.message = message;
         this.config = config;
