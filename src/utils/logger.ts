@@ -26,7 +26,7 @@ class CustomLogger {
                 : `${formattedTimestamp} ${levelLabel} ${level == "debug" ? chalk.blackBright(message) : message}`;
         })
 
-        const fileFormat = printf(({ level, message, timestamp, stack }) => {
+        const fileFormat = printf(({ level, message, timestamp, stack }: LogEntry & { stack?: string }) => {
             return stack 
             ? `[${timestamp}] [${level.toUpperCase()}] ${message}\n  Stack trace:\n    ${stack}`
             : `[${timestamp}] [${level.toUpperCase()}] ${message}`
