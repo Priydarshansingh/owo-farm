@@ -1,7 +1,7 @@
 import fs from "node:fs"
 import path from "node:path"
 import os from "node:os"
-import axios from "axios"
+import axios, { AxiosError } from "axios"
 import { confirm } from "@inquirer/prompts"
 import { logger } from "../utils/logger.js"
 import { exec, execSync, spawn } from "node:child_process"
@@ -14,14 +14,21 @@ class selfUpdate {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537'
     }
 
-    private async retryWithBackoff(fn: () => Promise<any>, retries = 3, delay = 1000): Promise<any> {
+    private async retryWithBackoff(fn: () => Promise<any>, retries = 5, delay = 2000): Promise<any> {
         try {
             return await fn()
         } catch (error) {
+            const axiosError = error as AxiosError
             if (retries === 0) {
-                throw error
+                throw new Error(`Failed after all retries. Last error: ${axiosError.message}`)
             }
-            logger.info(`Request failed, retrying in ${delay/1000} seconds...`)
+            
+            // Log more detailed error information
+            logger.info(`Request failed (${axiosError.code || 'unknown error'}), retrying in ${delay/1000} seconds...`)
+            if (axiosError.response) {
+                logger.debug(`Status: ${axiosError.response.status}`)
+            }
+            
             await new Promise(resolve => setTimeout(resolve, delay))
             return this.retryWithBackoff(fn, retries - 1, delay * 2)
         }
@@ -35,12 +42,22 @@ class selfUpdate {
         logger.info("Checking for update...")
 
         try {
-            const currentVersion = JSON.parse(fs.readFileSync(path.join(process.cwd(), "package.json"), "utf-8")).version
+            // First try to read the current version
+            let currentVersion: string
+            try {
+                currentVersion = JSON.parse(fs.readFileSync(path.join(process.cwd(), "package.json"), "utf-8")).version
+            } catch (error) {
+                logger.error("Failed to read local package.json:")
+                logger.error(error as Error)
+                return
+            }
             
+            // Configure axios with increased timeouts and proper error handling
             const { data: { version: latestVersion } } = await this.retryWithBackoff(() => 
                 axios.get("https://github.com/Kyou-Izumi/advanced-discord-owo-tool-farm/raw/refs/heads/main/package.json", {
                     headers: this.baseHeaders,
-                    timeout: 10000 // Increase timeout to 10 seconds
+                    timeout: 30000, // Increase timeout to 30 seconds
+                    validateStatus: (status) => status === 200, // Only accept 200 status
                 })
             )
 
@@ -66,7 +83,16 @@ class selfUpdate {
             }
         } catch (error) {
             logger.error("Failed to check for updates after multiple retries:")
-            logger.error(error as Error)
+            if (error instanceof Error) {
+                logger.error(error.message)
+                if ((error as AxiosError).isAxiosError) {
+                    const axiosError = error as AxiosError
+                    logger.error(`Network error: ${axiosError.code || 'unknown'}`)
+                    if (axiosError.response) {
+                        logger.error(`Status: ${axiosError.response.status}`)
+                    }
+                }
+            }
             logger.info("Please check your network connection and try again later.")
         }
     }
@@ -106,7 +132,7 @@ class selfUpdate {
                 axios.get("https://github.com/Kyou-Izumi/advanced-discord-owo-tool-farm/archive/master.zip", {
                     responseType: "arraybuffer",
                     headers: this.baseHeaders,
-                    timeout: 30000 // Increase timeout to 30 seconds for larger file
+                    timeout: 60000 // Increase timeout to 60 seconds for larger file
                 })
             )
 
@@ -117,7 +143,13 @@ class selfUpdate {
 
         } catch (error) {
             logger.error("Error updating project manually:")
-            logger.error(error as Error)
+            if (error instanceof Error) {
+                logger.error(error.message)
+                if ((error as AxiosError).isAxiosError) {
+                    const axiosError = error as AxiosError
+                    logger.error(`Network error: ${axiosError.code || 'unknown'}`)
+                }
+            }
         }
     }
 
