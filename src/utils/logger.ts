@@ -18,18 +18,18 @@ class CustomLogger {
             debug: chalk.blackBright("[DEBUG]"),
         };
 
-        const consoleFormat = printf(({ level, message, timestamp, stack }: LogEntry & { stack?: string }) => {
-            const formattedTimestamp = chalk.bgYellow.black(timestamp)
-            const levelLabel = levelFormats[level] || chalk.magenta(`[${level.toUpperCase()}]`)
-            return stack
-                ? `${formattedTimestamp} ${levelLabel} ${message}\n${chalk.redBright(stack)}`
-                : `${formattedTimestamp} ${levelLabel} ${level == "debug" ? chalk.blackBright(message) : message}`;
+        const consoleFormat = printf((info) => {
+            const formattedTimestamp = chalk.bgYellow.black(String(info.timestamp))
+            const levelLabel = levelFormats[info.level] || chalk.magenta(`[${info.level.toUpperCase()}]`)
+            return info.stack
+                ? `${formattedTimestamp} ${levelLabel} ${String(info.message)}\n${chalk.redBright(info.stack)}`
+                : `${formattedTimestamp} ${levelLabel} ${info.level == "debug" ? chalk.blackBright(String(info.message)) : String(info.message)}`;
         })
 
-        const fileFormat = printf(({ level, message, timestamp, stack }: LogEntry & { stack?: string }) => {
-            return stack 
-            ? `[${timestamp}] [${level.toUpperCase()}] ${message}\n  Stack trace:\n    ${stack}`
-            : `[${timestamp}] [${level.toUpperCase()}] ${message}`
+        const fileFormat = printf((info) => {
+            return info.stack 
+            ? `[${info.timestamp}] [${info.level.toUpperCase()}] ${String(info.message)}\n  Stack trace:\n    ${info.stack}`
+            : `[${info.timestamp}] [${info.level.toUpperCase()}] ${String(info.message)}`
         })
 
         this.logger = createLogger({
